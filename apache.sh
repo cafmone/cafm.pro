@@ -47,10 +47,12 @@ cat <<EOT > ${SITESDIR}000-default.conf
 	Redirect permanent / http://${SERVER}
 </VirtualHost>
 EOT
+echo ''
 fi
 if askinstall "Run certbot" ; then
 	certbot
 fi
+echo ''
 /etc/init.d/apache2 restart
 echo ''
 }
