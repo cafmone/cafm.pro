@@ -27,4 +27,8 @@ SMTP_PASSWORD=""
 wget https://raw.githubusercontent.com/cafmone/cafm.pro/refs/heads/main/apache.sh  
 chmod +x apache.sh  
 ./apache.sh  
+## SSH Storage Setup  
+wget https://raw.githubusercontent.com/cafmone/cafm.pro/refs/heads/main/storage.sh  
+chmod +x storage.sh  
+./storage.sh  
 
