@@ -1,10 +1,13 @@
 sudo bash  
-apt -y install nano  
+apt -y install wget nano  
 adduser [new user here]  
 usermod -aG sudo [new user here]  
-nano /etc/ssh/sshd_config >> PasswordAuthentication yes  
-nano /etc/ssh/sshd_config >> PermitRootLogin no  
+nano /etc/ssh/sshd_config  
+```
+PasswordAuthentication yes  
+PermitRootLogin no  
+```
 sudo service ssh restart  
-touch setup.sh  
+wget https://raw.githubusercontent.com/cafmone/cafm.pro/refs/heads/main/setup.sh  
 chmod +x setup.sh  
 nano setup.sh  
