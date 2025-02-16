@@ -1,4 +1,4 @@
-sudo bash
+sudo bash  
 apt -y install nano  
 adduser [new user here]  
 usermod -aG sudo [new user here]  
