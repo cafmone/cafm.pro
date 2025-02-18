@@ -4,10 +4,11 @@ CURRENT=$(whoami)
 if [ "$CURRENT" != "root" ]
 	then
 		echo "usage: sudo $0"
-		exit
+		exit 0
 fi
 if ! [ -x "$(command -v sshfs)" ]; then
 	echo -e "Please run: apt -y install sshfs"
+	exit 0
 fi
 user() {
 	read -e -p "SSH Username: " USER
@@ -64,7 +65,7 @@ setup() {
 					if askinstall; then
 						echo ''
 						cat $FSTAB > $FSTAB.bak
-						echo -e "$USER@$REMOTE $TARGET fuse.sshfs allow_other,_netdev,reconnect,ServerAliveInterval=15,ServerAliveCountMax=3,IdentityFile=$PASS 0 0" >> $FSTAB
+						echo -e "$USER@$REMOTE $TARGET fuse.sshfs allow_other,uid=$(id -u www-data),gid=$(id -g www-data),_netdev,reconnect,ServerAliveInterval=15,ServerAliveCountMax=3,IdentityFile=$PASS 0 0" >> $FSTAB
 						systemctl daemon-reload
 						mount -a
 						if askrestore; then

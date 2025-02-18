@@ -47,8 +47,8 @@ cat <<EOT > ${SITESDIR}000-default.conf
 	Redirect permanent / http://${SERVER}
 </VirtualHost>
 EOT
-echo ''
 fi
+echo ''
 if askinstall "Run certbot" ; then
 	certbot
 fi
