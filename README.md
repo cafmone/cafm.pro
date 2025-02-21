@@ -28,7 +28,11 @@ wget https://raw.githubusercontent.com/cafmone/cafm.pro/refs/heads/main/apache.s
 chmod +x apache.sh  
 ./apache.sh  
 ## SSH Storage Setup  
-wget https://raw.githubusercontent.com/cafmone/cafm.pro/refs/heads/main/storage.sh  
-chmod +x storage.sh  
-./storage.sh  
+wget https://raw.githubusercontent.com/cafmone/cafm.pro/refs/heads/main/storage.sshfs.sh  
+chmod +x storage.sshfs.sh  
+./storage.sshfs.sh  
+## Webdav Storage Setup  
+wget https://raw.githubusercontent.com/cafmone/cafm.pro/refs/heads/main/storage.davfs.sh  
+chmod +x storage.davfs.sh  
+./storage.davfs.sh  
 
