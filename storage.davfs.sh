@@ -12,19 +12,19 @@ if ! [ -x "$(command -v mount.davfs)" ]; then
 	exit 0
 fi
 user() {
-	read -e -p "Webdav User: " USER
+	read -e -p "WebDAV User: " USER
 	if [ -z "${USER}" ]; then
 		user
 	fi
 }
 pass() {
-	read -e -p "Webdav Password: " -i "" PASS
+	read -e -p "WebDAV Password: " -i "" PASS
 	if [ -z "${PASS}" ]; then
 		pass
 	fi
 }
 server() {
-	read -e -p "Webdav Server: " -i "https://webdav.hidrive.strato.com" SERVER
+	read -e -p "WebDAV Server: " -i "https://webdav.hidrive.strato.com" SERVER
 	if [ -z "${SERVER}" ]; then
 		server
 	fi

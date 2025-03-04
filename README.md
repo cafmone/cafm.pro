@@ -1,3 +1,4 @@
+![Schematische Darstellung](https://github.com/cafmone/cafm.pro/blob/main/Datenraum.png?raw=true)
 ## Basic Server Setup  
 sudo bash  
 cd /root/  
@@ -13,16 +14,16 @@ sudo service ssh restart
 ## Advanced Server Setup  
 wget https://raw.githubusercontent.com/cafmone/cafm.pro/refs/heads/main/setup.sh  
 chmod +x setup.sh  
-nano setup.sh  
-```
-TO=""
-FROM=""
-SMTP_SERVER=""
-SMTP_PORT="465"
-SMTP_USER=""
-SMTP_PASSWORD=""
-```
 ./setup.sh  
+nano /etc/php/[php version]/apache2/php.ini  
+```
+memory_limit = 256M
+display_errors = On
+post_max_size = 40M
+file_uploads = On
+upload_max_filesize = 20M
+```
+/etc/init.d/apache2 restart
 ## Webserver Setup  
 wget https://raw.githubusercontent.com/cafmone/cafm.pro/refs/heads/main/apache.sh  
 chmod +x apache.sh  
@@ -35,4 +36,18 @@ chmod +x storage.sshfs.sh
 wget https://raw.githubusercontent.com/cafmone/cafm.pro/refs/heads/main/storage.davfs.sh  
 chmod +x storage.davfs.sh  
 ./storage.davfs.sh  
+## Rsync Backup  
+wget https://raw.githubusercontent.com/cafmone/cafm.pro/refs/heads/main/rsync.sh  
+chmod +x rsync.sh  
+nano rsync.sh  
+```
+SERVER=""
+PORT="22"
+USER=""
+PASSWORD=""
+SOURCE="/var/www/profiles/"
+TARGET="/home/"
+SKIP="lost+found"
+```
+./rsync.sh  
 
