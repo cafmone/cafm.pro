@@ -1,7 +1,9 @@
-![Schematische Darstellung](https://github.com/cafmone/cafm.pro/blob/main/Datenraum.png?raw=true)
+![Schematische Darstellung](https://github.com/cafmone/cafm.pro/blob/main/Datenraum.png?raw=true)  
+![CAFM.ONE Checkliste](https://github.com/cafmone/cafm.pro/blob/main/Checkliste.png?raw=true)
 ## Basic Server Setup  
 sudo bash  
 cd /root/  
+timedatectl set-timezone Europe/Berlin  
 apt -y install wget nano  
 adduser [new user here]  
 usermod -aG sudo [new user here]  
@@ -32,11 +34,15 @@ chmod +x apache.sh
 wget https://raw.githubusercontent.com/cafmone/cafm.pro/refs/heads/main/storage.sshfs.sh  
 chmod +x storage.sshfs.sh  
 ./storage.sshfs.sh  
-## Webdav Storage Setup  
+## WebDAV Storage Setup  
 wget https://raw.githubusercontent.com/cafmone/cafm.pro/refs/heads/main/storage.davfs.sh  
 chmod +x storage.davfs.sh  
 ./storage.davfs.sh  
-## Rsync Backup  
+## Update Check  
+wget https://raw.githubusercontent.com/cafmone/cafm.pro/refs/heads/main/apt.sh  
+chmod +x apt.sh  
+./apt.sh  
+## Rsync (Backup)  
 wget https://raw.githubusercontent.com/cafmone/cafm.pro/refs/heads/main/rsync.sh  
 chmod +x rsync.sh  
 nano rsync.sh  
@@ -50,4 +56,10 @@ TARGET="/home/"
 SKIP="lost+found"
 ```
 ./rsync.sh  
+## CRON Jobs  
+crontab -e
+```
+0 2 * * 7 /root/rsync.sh
+0 4 * * 7 /root/apt.sh
+```
 
