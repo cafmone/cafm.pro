@@ -63,4 +63,58 @@ crontab -e
 0 2 * * 7 /root/rsync.sh
 0 4 * * 7 /root/apt.sh
 ```
+## Openstreetmap via Caching Proxy Server  
+a2enmod cache cache_disk headers expires proxy proxy_http ssl
+mkdir /var/www/openstreetmap  
+mkdir /var/www/openstreetmap/cache  
+chmod --recursive 0777 /var/www/openstreetmap  
+nano /etc/apache2/sites-enabled/openstreetmap.conf
+```
+Listen 8080
+<VirtualHost *:8080>
+  DocumentRoot /var/www/openstreemap
+  <Directory "/var/www/opensteetmap">
+    AllowOverride All
+	</Directory>
+
+	# enable caching for all requests; cache content on local disk
+	CacheEnable disk /a
+	CacheEnable disk /b
+	CacheEnable disk /c
+	CacheRoot /var/www/openstreemap/cache/
+
+	# common caching directives
+	CacheQuickHandler off
+	CacheLock on
+	CacheLockPath /tmp/mod_cache-lock
+	CacheLockMaxAge 5
+	CacheHeader On
+
+	# cache control
+	CacheIgnoreNoLastMod On
+	CacheIgnoreCacheControl On
+	CacheStoreNoStore On
+
+	ProxyTimeout 600
+
+	# reverse proxy requests to upstream server
+	ProxyRequests On # used for forward proxying
+	SSLProxyEngine On # required if proxying to https
+	 
+	ProxyPass /a https://a.tile.openstreetmap.de/
+	ProxyPassReverse /a https://a.tile.openstreetmap.de/
+
+	ProxyPass /b https://b.tile.openstreetmap.de/
+	ProxyPassReverse /b https://b.tile.openstreetmap.de/
+	 
+	ProxyPass /c  https://c.tile.openstreetmap.de/
+	ProxyPassReverse /c https://c.tile.openstreetmap.de/
+
+</VirtualHost>
+```
+/etc/init.d/apache2 restart  
+
+
+
+
 
