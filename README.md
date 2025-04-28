@@ -72,9 +72,9 @@ nano /etc/apache2/sites-enabled/openstreetmap.conf
 ```
 Listen 8080
 <VirtualHost *:8080>
-  DocumentRoot /var/www/openstreemap
-  <Directory "/var/www/opensteetmap">
-    AllowOverride All
+	DocumentRoot /var/www/openstreemap
+	<Directory "/var/www/opensteetmap">
+		AllowOverride All
 	</Directory>
 
 	# enable caching for all requests; cache content on local disk
