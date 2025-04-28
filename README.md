@@ -64,7 +64,7 @@ crontab -e
 0 4 * * 7 /root/apt.sh
 ```
 ## Openstreetmap via Caching Proxy Server  
-a2enmod cache cache_disk headers expires proxy proxy_http ssl
+a2enmod cache cache_disk headers expires proxy proxy_http ssl  
 mkdir /var/www/openstreetmap  
 mkdir /var/www/openstreetmap/cache  
 chmod --recursive 0777 /var/www/openstreetmap  
