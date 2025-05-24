@@ -62,6 +62,7 @@ crontab -e
 ```
 0 2 * * 7 /root/rsync.sh
 0 4 * * 7 /root/apt.sh
+```
 ## WebDAV Server Setup  
 a2enmod dav dav_fs  
 nano /etc/apache2/sites-enabled/webdav.conf
@@ -75,7 +76,6 @@ Alias /webdav "/var/www/profiles/"
   AuthUserFile /var/www/profiles/hostmaster/.htpasswd
   Require valid-user
 </Directory>
-
 ```
 /etc/init.d/apache2 restart  
 ## Samba Server Setup  
