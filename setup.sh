@@ -36,6 +36,7 @@ fi
 ## Apache
 if ! [ -x "$(command -v apache2)" ]; then
 	apt -y install apache2
+	a2enmod rewrite
 else
 	echo -e "Apache2 already installed - nothing to do. $(which apache2)"
 fi

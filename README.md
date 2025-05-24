@@ -62,7 +62,45 @@ crontab -e
 ```
 0 2 * * 7 /root/rsync.sh
 0 4 * * 7 /root/apt.sh
+## WebDAV Server Setup  
+a2enmod dav dav_fs  
+nano /etc/apache2/sites-enabled/webdav.conf
 ```
+Alias /webdav "/var/www/profiles/"
+<Directory "/var/www/profiles/">
+  DAV on
+  AllowOverride All
+  AuthType Basic
+  AuthName DAV
+  AuthUserFile /var/www/profiles/hostmaster/.htpasswd
+  Require valid-user
+</Directory>
+
+```
+/etc/init.d/apache2 restart  
+## Samba Server Setup  
+mkdir /home/public/  
+chown nobody:nogroup /home/public/  
+apt install wsdd samba samba-common smbclient  
+systemctl enable smbd  
+systemctl restart smbd  
+smbpasswd -a hostmaster  
+nano nano /etc/samba/smb.conf
+```
+[global]
+allow insecure wide links = yes
+
+[Public]
+	path = /home/public/
+	writable = yes
+	guest ok = yes
+	guest only = yes
+	force create mode = 777
+	force directory mode = 777
+	follow symlinks = yes
+	wide links = yes
+```
+systemctl restart smbd  
 ## Openstreetmap via Caching Proxy Server  
 a2enmod cache cache_disk headers expires proxy proxy_http ssl  
 mkdir /var/www/openstreetmap  
@@ -113,8 +151,3 @@ Listen 8080
 </VirtualHost>
 ```
 /etc/init.d/apache2 restart  
-
-
-
-
-
