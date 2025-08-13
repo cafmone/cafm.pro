@@ -1,4 +1,19 @@
 #!/bin/bash
+mkkey(){
+if [ -z "$1" ]
+then
+        length=16
+else
+        length=$1
+fi
+key=$(tr -dc "A-Za-z0-9()*+,-.:;<=>?@[]^_{|}" </dev/urandom | head -c ${length}; echo)
+echo ${key}
+}
+
+PWD=$(pwd)
+DBPASS=$(mkkey 16)
+WPTHEME="${PWD}/wordpress/themes/cafm.pro"
+WPPREFIX='wp_'
 WORDPRESSURL="https://de.wordpress.org/latest-de_DE.zip"
 WORDPRESSFILE="latest-de_DE.zip"
 
@@ -23,18 +38,30 @@ start() {
 	TMPDIR=$(mktemp -d)
 	echo "Unziping to ${TMPDIR} .."
 	unzip -q ${WORDPRESSFILE} -d ${TMPDIR}
+        chown -R www-data:www-data ${TMPDIR}
+        find ${TMPDIR} -type d -print0 | xargs -0 chmod 777
+        find ${TMPDIR} -type f -print0 | xargs -0 chmod 666
 	echo "Moving Files to ${ROOT} .."
-	cp -r ${TMPDIR}/wordpress/. ${ROOT}
-	chown -R www-data:www-data ${ROOT}
-	find ${ROOT} -type d -print0 | xargs -0 chmod 777
-	find ${ROOT} -type f -print0 | xargs -0 chmod 666
+	cp -rp ${TMPDIR}/wordpress/. ${ROOT}
 	echo "Removing ${TMPDIR} .."
 	rm -r ${TMPDIR}
+
+	if [ -d "${WPTHEME}" ]
+	then
+        	USER=$(ls -ld ${WPTHEME} | awk '{print $3}')
+        	if [ ! ${USER} = "www-data" ]
+        	then
+                	chown -R www-data:www-data ${WPTHEME}
+        		find ${WPTHEME} -type d -print0 | xargs -0 chmod 777
+        		find ${WPTHEME} -type f -print0 | xargs -0 chmod 666
+		fi
+		ln -s ${WPTHEME} ${ROOT}/wp-content/themes/
+	fi
 	echo "Done"
 }
 
 dbsetup() {
-	DBPASS=$(openssl rand -base64 16)
+	DBPASS=$(mkkey 24)
 	read -e -p "MySQL User: " -i "root" MYUSER
 	read -e -p "MySQL Password: " -i "" MYPASS
 	read -e -p "WordPress database and user: " -i "" WPDB
@@ -72,6 +99,26 @@ dbsetup() {
 	echo "WordPress database: ${WPDB}"
 	echo "WordPress user: ${WPDB}"
 	echo "WordPress pass: ${DBPASS}"
+        echo ""
+        echo "Configuring WordPress .."
+
+	WPPREFIX='wp_'
+	WPCONFIG="${ROOT}/wp-config.php"
+	cp -p ${ROOT}/wp-config-sample.php ${WPCONFIG}
+
+	sed -i -e "s/database_name_here/${WPDB}/g" ${WPCONFIG}
+	sed -i -e "s/username_here/${WPDB}/g" ${WPCONFIG}
+	sed -i -e "s/password_here/${DBPASS}/g" ${WPCONFIG}
+	sed -i -e "s/$table_prefix = 'wp_'/$table_prefix = '${WPPREFIX}'/g" ${WPCONFIG}
+
+	sed -i -e "s/^\(define.*'AUTH_KEY'.*\)put your unique phrase here\(.*\)$/\1$(mkkey 64)\2/" ${WPCONFIG}
+	sed -i -e "s/^\(define.*'SECURE_AUTH_KEY'.*\)put your unique phrase here\(.*\)$/\1$(mkkey 64)\2/" ${WPCONFIG}
+	sed -i -e "s/^\(define.*'LOGGED_IN_KEY'.*\)put your unique phrase here\(.*\)$/\1$(mkkey 64)\2/" ${WPCONFIG}
+	sed -i -e "s/^\(define.*'NONCE_KEY'.*\)put your unique phrase here\(.*\)$/\1$(mkkey 64)\2/" ${WPCONFIG}
+	sed -i -e "s/^\(define.*'AUTH_SALT'.*\)put your unique phrase here\(.*\)$/\1$(mkkey 64)\2/" ${WPCONFIG}
+	sed -i -e "s/^\(define.*'SECURE_AUTH_SALT'.*\)put your unique phrase here\(.*\)$/\1$(mkkey 64)\2/" ${WPCONFIG}
+	sed -i -e "s/^\(define.*'LOGGED_IN_SALT'.*\)put your unique phrase here\(.*\)$/\1$(mkkey 64)\2/" ${WPCONFIG}
+	sed -i -e "s/^\(define.*'NONCE_SALT'.*\)put your unique phrase here\(.*\)$/\1$(mkkey 64)\2/" ${WPCONFIG}
 }
 
 askinstall() {
