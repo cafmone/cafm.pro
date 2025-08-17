@@ -67,7 +67,7 @@ fi
 
 ## PHP
 if ! [ -x "$(command -v php)" ]; then
-	apt -y install php libapache2-mod-php php-mysql php-mbstring php-zip php-gd php-json php-curl
+	apt -y install php libapache2-mod-php php-mysql php-mbstring php-zip php-gd php-json php-curl php-intl php-imagick
 else
 	echo -e "PHP already installed - nothing to do. $(which php)"
 fi
