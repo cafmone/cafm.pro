@@ -132,7 +132,7 @@ function cafmpro_customizer( $wp_customize ) {
 	);
 
 	$wp_customize->add_setting( 'topnav-menu-border-root', array(
-			'default' => '',
+			'default' => false,
 			'type' => 'theme_mod',
 			'capability' => 'edit_theme_options'
 		),
@@ -648,7 +648,7 @@ function cafmpro_customizer( $wp_customize ) {
 
 		foreach($modes as $m) {
 			if($m !== '') {
-				$m = ' '.$m;
+				$m = '-'.$m;
 			}
 			$label = $d['label'].$m;
 			if(isset($d['custom'])) {
