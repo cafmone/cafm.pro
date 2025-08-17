@@ -1,41 +1,31 @@
 <?php get_header(); ?>
 <div class="canvas box">
 	<div class="canvas wrap">
-		<div id="canvas" style="">
-			<div class="box" style="position: relative;">
+		<div id="canvas" style="position: relative;">
+			<div class="box" style="">
 				<div id="primary" class="content-area" style="">
-				
-				
-												<a href="#" target="_blank">Link</a>
-				
-				<?php
-					while ( have_posts() ) :
-						the_post();
-					?>
-						<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-							<div class="entry-header">
-								<?php 
-									#the_title( '<h1 class="entry-title">', '</h1>' );
-									#wp_list_pages(array('child_of'=>50));
-									#wentyseventeen_edit_link( get_the_ID() );
-								?>
-							</div>
-							<div class="entry-content">
-								<?php
-									the_content();
-								?>
-							</div>
-						</article>
 
-						<?php
-						// If comments are open or we have at least one comment, load up the comment template.
-						if ( comments_open() || get_comments_number() ) :
-							comments_template();
-						endif;
-						?>
+<?php get_template_part( 'template-parts/breadcrumbs' ); ?>
+<div style="">
+	<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+		<div class="entry-header">
+			<?php the_title( '<h3 class="entry-title">', '</h3>' ); ?>
+		</div>
+		<div class="entry-content">
+			<?php 
+			the_content();
+			$time =  get_option( 'date_format' ).' '.get_option( 'time_format' );
+			if ( get_the_modified_time( 'U' ) > get_the_time( 'U' ) ) {
+				echo '<small class="article-date">'.__('Last updated').': '.get_the_modified_time($time).'</small>';
+			} else {
+				echo '<small class="article-date">'.__('Published').': '.get_the_time($time).'</small>';
+			}
+			 ?>
+		</div>
+	</article>
+</div>
 
-					<?php endwhile; // End of the loop. ?>
-					<span style="clear:both; line-height:0px;font-size:0px">&#160;</span>
+					<span style="display:block;clear:both; line-height:0px;font-size:0px">&#160;</span>
 				</div>
 				<span class="canvas-customizer" style="position: absolute; right: 0; top: 0; font-size:0px; line-height:0px;">&#160;</span>
 			</div>

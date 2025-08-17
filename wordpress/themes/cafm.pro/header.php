@@ -65,8 +65,8 @@
 				</table>
 				<span class="header-customizer" style="position: absolute; right: 0; top: 0; font-size:0px; line-height:0px;">&#160;</span>
 			</div>
-		</div>
-	</header>
+		</header>
+	</div>
 </div>
 <div style="">
 	<div class="topnav wrap">

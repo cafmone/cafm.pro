@@ -146,6 +146,41 @@ function cafmpro_customizer( $wp_customize ) {
 		)
 	);
 
+	### TODO
+	$wp_customize->add_section( 'nav_menu_custom', array(
+		'title' => __( 'Breadcrumps', 'nssra' ),
+		'panel' => 'nav_menus',
+		'priority' => 15,
+	) );
+	$wp_customize->add_setting( 'breadcrumps_hide', array(
+			'default' => '',
+			'type' => 'theme_mod',
+			'capability' => 'edit_theme_options'
+		),
+	);
+	$wp_customize->add_control( 'breadcrumps_hide', array(
+			'label' => __( 'Hide Breadcrumps', 'textdomain' ),
+			'settings' => 'breadcrumps_hide',
+			'priority' => 9,
+			'section' => 'nav_menu_custom',
+			'type' => 'checkbox',
+		)
+	);
+	$wp_customize->add_setting( 'breadcrumps_delimit', array(
+			'default' => '&rsaquo;',
+			'type' => 'theme_mod',
+			'capability' => 'edit_theme_options'
+		),
+	);
+	$wp_customize->add_control( 'breadcrumps_delimit', array(
+			'label' => __( 'Delimiter', 'textdomain' ),
+			'settings' => 'breadcrumps_delimit',
+			'priority' => 9,
+			'section' => 'nav_menu_custom',
+			'type' => 'text',
+		)
+	);
+
 
 	// --------------------------------
 	// help
@@ -301,8 +336,12 @@ function cafmpro_customizer( $wp_customize ) {
 				'capability' => 'edit_theme_options'
 			),
 		);
+		$label = 'Width';
+		if(isset($d['custom'])) {
+			$label = $d['custom'].' '.$label;
+		}
 		$wp_customize->add_control( $d['name'], array(
-				'label' => __( 'Width', 'textdomain' ),
+				'label' => __( $label, 'textdomain' ),
 				'settings' => $d['name'],
 				'priority' => 12,
 				'section' => $d['section'],
@@ -524,10 +563,14 @@ function cafmpro_customizer( $wp_customize ) {
 	) );
 	$data = $settings['fonts'];
 	foreach($data as $d) {
+		$panel = 'fonts-panel';
+		if(isset($d['panel'])) {
+			$panel = $d['panel'];
+		}
 		$wp_customize->add_section( $d['section'] , array(
 			'title' => __( $d['label'], 'starter' ),
-			'priority' => 10,
-			'panel' => 'fonts-panel',
+			'priority' => 11,
+			'panel' => $panel,
 		) );
 		$wp_customize->add_setting( $d['name'].'-color', array(
 				'default' => '#000000',
@@ -605,7 +648,7 @@ function cafmpro_customizer( $wp_customize ) {
 
 		foreach($modes as $m) {
 			if($m !== '') {
-				$m = '-'.$m;
+				$m = ' '.$m;
 			}
 			$label = $d['label'].$m;
 			if(isset($d['custom'])) {

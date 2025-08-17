@@ -27,7 +27,7 @@ function cafmpro_customizer_settings() {
 			'topnav' => array(
 					'name'=>'topnav-background',
 					'section' => 'background-topnav',
-					'label' => 'Topnav',
+					'label' => 'Top Menu',
 					'selector'=>'#topnav',
 				),
 			'canvas' => array(
@@ -53,8 +53,16 @@ function cafmpro_customizer_settings() {
 			'topnav' => array(
 					'name'=>'topnav-width',
 					'section' => 'dimensions-section-topnav', 
-					'label' => 'Topnav',
+					'label' => 'Top Menu',
 					'selector'=>'.topnav.wrap',
+				),
+			'topnav-menu' => array(
+					'name'=>'topnav-menu-width',
+					'section' => 'fonts-section-topnav', 
+					'label' => 'Top Menu',
+					'type' => 'min-width',
+					'selector'=>'#topnav .main-navigation a',
+					'custom' => 'Menu',
 				),
 			'canvas' => array(
 					'name'=>'canvas-width',
@@ -88,7 +96,7 @@ function cafmpro_customizer_settings() {
 			'topnav' => array(
 					'name'=>'topnav-margin',
 					'section' => 'dimensions-section-topnav', 
-					'label' => 'Topnav',
+					'label' => 'Top Menu',
 					'selector'=>'.topnav.wrap',
 				),
 			'canvas' => array(
@@ -127,14 +135,15 @@ function cafmpro_customizer_settings() {
 			'topnav' => array(
 					'name'=>'topnav-padding',
 					'section' => 'dimensions-section-topnav', 
-					'label' => 'Topnav',
+					'label' => 'Top Menu',
 					'selector'=>'#topnav .box',
 				),
 			'topnav-menu' => array(
 					'name'=>'topnav-font',
 					'section' => 'fonts-section-topnav',
-					'label' => 'Topnav',
+					'label' => 'Top Menu',
 					'selector'=>'#topnav .main-navigation a',
+					'custom' => 'Menu',
 				),
 			'canvas' => array(
 					'name'=>'canvas-padding',
@@ -159,7 +168,7 @@ function cafmpro_customizer_settings() {
 			'topnav' => array(
 					'name' => 'topnav-border',
 					'section' => 'border-section-topnav', 
-					'label' => 'Topnav',
+					'label' => 'Top Menu',
 					'selector'=> '#topnav',
 				),
 			'canvas' => array(
@@ -190,11 +199,13 @@ function cafmpro_customizer_settings() {
 					'custom' => 'Tagline',
 					'selector'=>'#header .site-description h2',
 				),
-			'topnav' => array(
+			'topnav-menu' => array(
 					'name'=>'topnav-font',
+					'panel'=>'nav_menus',
 					'section' => 'fonts-section-topnav',
-					'label' => 'Topnav',
+					'label' => 'Top Menu',
 					'selector'=>'#topnav .main-navigation a',
+					'custom' => 'Font',
 				),
 			'canvas' => array(
 					'name'=>'canvas-font',
@@ -215,12 +226,22 @@ function cafmpro_customizer_settings() {
 					'section' => 'fonts-section-canvas',
 					'label' => 'Link',
 					'decoration' => 'text',
-					'selector'=>'#canvas .box a',
+					'selector'=> array('#canvas .box a'),
+				),
+			'breadcrumbs' => array(
+					'name'=>'breadcrumbs-font',
+					'section' => 'nav_menu_custom',
+					'label' => 'Link',
+					'decoration' => 'text',
+					'selector'=> array(
+							'#canvas .box .breadcrumbs a',
+							'#canvas .box .sidebar a',
+						),
 				),
 			'topnav' => array(
 					'name'=>'topnav-menu-a',
 					'section' => 'fonts-section-topnav',
-					'label' => 'Topnav',
+					'label' => 'Top Menu',
 					'decoration' => 'text',
 					'selector'=> array(
 									'#topnav .main-navigation a',
@@ -232,17 +253,17 @@ function cafmpro_customizer_settings() {
 					'name'=>'topnav-menu-background',
 					'section' => 'fonts-section-topnav',
 					'decoration' => 'background',
-					'label' => 'Topnav',
+					'label' => 'Top Menu',
 					'selector'=>'#topnav .main-navigation li',
-					'custom' => 'Background',
+					'custom' => 'Menu Background',
 				),
 			'topnav-border' => array(
 					'name'=>'topnav-menu-border',
 					'section' => 'fonts-section-topnav',
 					'decoration' => 'border',
-					'label' => 'Topnav',
+					'label' => 'Top Menu',
 					'selector'=>'#topnav .main-navigation ul ul',
-					'custom' => 'Border',
+					'custom' => 'Menu Border',
 				),
 		),
 		'defaults' => array (

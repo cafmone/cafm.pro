@@ -59,24 +59,19 @@ function cafmpro_customizer_css() {
 	if(get_theme_mod('topnav-menu-border-color') !== false) {
 		$selector = '#topnav .main-navigation ul ul li';
 		if (get_theme_mod('topnav-menu-border-root') !== false) {
-			$css .= '#topnav .main-navigation ul li:not(ul ul li) {margin: -1px 0 -1px -1px; border: 1px solid '.get_theme_mod('topnav-menu-border-color').'; }'."\n";
+			$css .= '#topnav .main-navigation ul li:not(ul ul li) { z-index: 10; margin: -1px 0 -1px -1px; border: 1px solid '.get_theme_mod('topnav-menu-border-color').'; }'."\n";
 		}
-		$css .= '#topnav .main-navigation ul ul { border-color: '.get_theme_mod('topnav-menu-border-color').'; }'."\n";
-	} else {
-		$css .= '#topnav .main-navigation ul ul { border-color:#ccc; }'."\n";
 	}
 
 	if(get_theme_mod('topnav-menu-border-hover-color') !== false) {
 		if (get_theme_mod('topnav-menu-border-root') !== false) {
-			$css .= '#topnav .main-navigation ul li:hover:not(ul ul li) {border-color: '.get_theme_mod('topnav-menu-border-hover-color').'; }'."\n";
+			$css .= '#topnav .main-navigation ul li:hover:not(ul ul li) {z-index: 11; border-color: '.get_theme_mod('topnav-menu-border-hover-color').'; }'."\n";
 		}
-		$css .= '#topnav .main-navigation ul ul:hover { border-color: '.get_theme_mod('topnav-menu-border-hover-color').'; }'."\n";
 	}
 	if(get_theme_mod('topnav-menu-border-active-color') !== false) {
 		if (get_theme_mod('topnav-menu-border-root') !== false) {
-			$css .= '#topnav .main-navigation ul li:active:not(ul ul li) {border-color: '.get_theme_mod('topnav-menu-border-active-color').'; }'."\n";
+			$css .= '#topnav .main-navigation ul li:active:not(ul ul li) {z-index: 11; border-color: '.get_theme_mod('topnav-menu-border-active-color').'; }'."\n";
 		}
-		$css .= '#topnav .main-navigation ul ul:active { border-color: '.get_theme_mod('topnav-menu-border-active-color').'; }'."\n";
 	}
 
 	// --------------------------------
@@ -212,7 +207,11 @@ function cafmpro_customizer_css() {
 	$data = $settings['width'];
 	foreach ($data as $d) {
 		if (get_theme_mod($d['name'])) {
-			$css .= $d['selector'].' { width:'.get_theme_mod($d['name']).'; }'."\n";
+			$type = 'width';
+			if(isset($d['type'])) {
+				$type = $d['type'];
+			}
+			$css .= $d['selector'].' { '.$type.':'.get_theme_mod($d['name']).'; }'."\n";
 		}
 	}
 
@@ -242,7 +241,7 @@ function cafmpro_customizer_css() {
 	$data = $settings['padding'];	
 	foreach ($data as $d) {
 		if (get_theme_mod($d['name']) !== false) {
-			if(isset($d['selector']) ) {
+			if(isset($d['selector']) && get_theme_mod($d['name']) !== '') {
 				$css .= $d['selector'].' { padding:'.get_theme_mod($d['name']).'; }'."\n";
 			}
 		} else {
