@@ -1,11 +1,4 @@
 #!/bin/bash
-PWD=$(pwd)
-DBPASS=$(mkkey 16)
-WPTHEME="${PWD}/wordpress/themes/cafm.pro"
-WPPREFIX='wp_'
-WORDPRESSURL="https://de.wordpress.org/latest-de_DE.zip"
-WORDPRESSFILE="latest-de_DE.zip"
-
 mkkey(){
 if [ -z "$1" ]
 	then
@@ -17,10 +10,12 @@ if [ -z "$1" ]
 	echo ${key}
 }
 
-if ! [ -x "$(command -v unzip)" ]; then
-	echo "apt -y install unzip"
-	exit
-fi
+PWD=$(pwd)
+DBPASS=$(mkkey 16)
+WPTHEME="${PWD}/wordpress/themes/cafm.pro"
+WPPREFIX='wp_'
+WORDPRESSURL="https://de.wordpress.org/latest-de_DE.zip"
+WORDPRESSFILE="latest-de_DE.zip"
 
 root() {
 	read -e -p "Choose Wordpress DocumentRoot: " -i "/var/www" ROOT
@@ -45,11 +40,9 @@ start() {
 	cp -rp ${TMPDIR}/wordpress/. ${ROOT}
 	echo "Removing ${TMPDIR} .."
 	rm -r ${TMPDIR}
-	if [ -d "${WPTHEME}" ]
-	then
+	if [ -d "${WPTHEME}" ]; then
 		USER=$(ls -ld ${WPTHEME} | awk '{print $3}')
-		if [ ! ${USER} = "www-data" ]
-		then
+		if [ ! ${USER} = "www-data" ]; then
 			chown -R www-data:www-data ${WPTHEME}
 			find ${WPTHEME} -type d -print0 | xargs -0 chmod 777
 			find ${WPTHEME} -type f -print0 | xargs -0 chmod 666
@@ -101,7 +94,7 @@ dbsetup() {
 	echo ""
 	echo "Configuring WordPress .."
 
-	WPPREFIX='wp_'
+	WPPREFIX="$(mkkey 6)_"
 	WPCONFIG="${ROOT}/wp-config.php"
 	cp -p ${ROOT}/wp-config-sample.php ${WPCONFIG}
 
@@ -148,19 +141,77 @@ setup() {
 	fi
 }
 
-### TODO install / backup /restore
-#DBTODUMP=mydb
-#SQL="SET group_concat_max_len = 10240;"
-#SQL="${SQL} SELECT GROUP_CONCAT(table_name separator ' ')"
-#SQL="${SQL} FROM information_schema.tables WHERE table_schema='${DBTODUMP}'"
-#SQL="${SQL} AND table_name NOT IN ('t1','t2','t3')"
-#TBLIST=`mysql -u... -p... -AN -e"${SQL}"`
-#mysqldump -u... -p... ${DBTODUMP} ${TBLIST} > mydb_tables.sql
+backup() {
+	echo "Starting backup ..."
+	echo "Source: ${1}"
+	echo "Target: ${2}"
+	WPCONFIG="$1/wp-config.php"
+	if [ -f "${WPCONFIG}" ]; then
+		if [ -d "${2}" ]; then
+			TMPDIR=$(mktemp -d)
+			WPDB=$(sed -n "s/^.*DB_NAME.*'\(.*\)'.*$/\1/p" < ${WPCONFIG})
+			WPUSER=$(sed -n "s/^.*DB_USER.*'\(.*\)'.*$/\1/p" < ${WPCONFIG})
+			MYSQL_PWD=$(sed -n "s/^.*DB_PASSWORD.*'\(.*\)'.*$/\1/p" < ${WPCONFIG})
+			WPPREFIX=$(sed -n "s/^.*table_prefix.*'\(.*\)'.*$/\1/p" < ${WPCONFIG})
+			SQL="SET group_concat_max_len = 10240;"
+			SQL="${SQL} SELECT GROUP_CONCAT(table_name separator ' ')"
+			SQL="${SQL} FROM information_schema.tables WHERE table_schema='${WPDB}'"
+			SQL="${SQL} AND table_name LIKE '${WPPREFIX}%'"
+			LIST=`mysql -u${WPUSER} -AN -e"${SQL}"`
+			mysqldump -u${WPUSER} ${WPDB} ${LIST} > ${TMPDIR}/wordpress.sql
+			cp -p ${WPCONFIG} ${TMPDIR}
+			mkdir ${TMPDIR}/wp-content/
+			mkdir ${TMPDIR}/wp-content/uploads/
+			cp -rp ${1}/wp-content/uploads/. ${TMPDIR}/wp-content/uploads/
+			if [ -f "${1}/wp-content/themes/cafm.pro/custom.css" ]; then
+				mkdir ${TMPDIR}/wp-content/themes/
+				mkdir ${TMPDIR}/wp-content/themes/cafm.pro/
+				cp -rp ${1}/wp-content/themes/cafm.pro/custom.* ${TMPDIR}/wp-content/themes/cafm.pro/
+			fi
+			find ${TMPDIR} -type d -print0 | xargs -0 chmod 777
+			find ${TMPDIR} -type f -print0 | xargs -0 chmod 666
+			cd ${TMPDIR}
+			echo "Compressing files ..."
+			(cd ${TMPDIR} && zip -q -r ${2}wordpress-backup.zip *)
+			rm -r ${TMPDIR}
+		else
+			echo "Error: target ${2} not found"
+		fi
+	else
+		echo "Error: No WordPress instance found in ${1}"
+	fi
+	echo "Done"
+}
 
+usage() {
+	echo 'Usage:'
+	echo "$0 setup"
+	echo "$0 backup /path/to/wordpress /path/to/backup"
+	exit
+}
 
 
 if ! [ -f ${WORDPRESSFILE} ]; then
 	wget ${WORDPRESSURL}
 fi
-setup
-
+if [ -z "$1" ]; then
+	usage
+else
+	if [ "$1" == "backup" ]; then
+		if [ -z "$2" ] || [ -z "$3" ]; then
+			usage
+		else
+			if ! [ -x "$(command -v zip)" ]; then
+				echo "Error: please run apt -y install zip"
+				exit
+			fi
+			backup $2 $3
+		fi
+	elif [ "$1" == "setup" ]; then
+		if ! [ -x "$(command -v unzip)" ]; then
+			echo "Error: please run apt -y install unzip"
+			exit
+		fi
+		setup
+	fi
+fi
