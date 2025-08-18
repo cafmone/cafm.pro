@@ -151,14 +151,15 @@ backup() {
 			TMPDIR=$(mktemp -d)
 			WPDB=$(sed -n "s/^.*DB_NAME.*'\(.*\)'.*$/\1/p" < ${WPCONFIG})
 			WPUSER=$(sed -n "s/^.*DB_USER.*'\(.*\)'.*$/\1/p" < ${WPCONFIG})
-			MYSQL_PWD=$(sed -n "s/^.*DB_PASSWORD.*'\(.*\)'.*$/\1/p" < ${WPCONFIG})
+			WPPASS=$(sed -n "s/^.*DB_PASSWORD.*'\(.*\)'.*$/\1/p" < ${WPCONFIG})
 			WPPREFIX=$(sed -n "s/^.*table_prefix.*'\(.*\)'.*$/\1/p" < ${WPCONFIG})
 			SQL="SET group_concat_max_len = 10240;"
 			SQL="${SQL} SELECT GROUP_CONCAT(table_name separator ' ')"
 			SQL="${SQL} FROM information_schema.tables WHERE table_schema='${WPDB}'"
 			SQL="${SQL} AND table_name LIKE '${WPPREFIX}%'"
+			export MYSQL_PWD=${WPPASS}
 			LIST=`mysql -u${WPUSER} -AN -e"${SQL}"`
-			mysqldump -u${WPUSER} ${WPDB} ${LIST} > ${TMPDIR}/wordpress.sql
+			mysqldump --no-tablespaces -u${WPUSER} ${WPDB} ${LIST} > ${TMPDIR}/wordpress.sql
 			cp -p ${WPCONFIG} ${TMPDIR}
 			mkdir ${TMPDIR}/wp-content/
 			mkdir ${TMPDIR}/wp-content/uploads/
