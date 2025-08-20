@@ -14,12 +14,12 @@
 		<div class="entry-content">
 			<?php 
 			the_content();
-			$time =  get_option( 'date_format' ).' '.get_option( 'time_format' );
-			if ( get_the_modified_time( 'U' ) > get_the_time( 'U' ) ) {
-				echo '<small class="article-date">'.__('Last updated').': '.get_the_modified_time($time).'</small>';
-			} else {
-				echo '<small class="article-date">'.__('Published').': '.get_the_time($time).'</small>';
-			}
+			#$time =  get_option( 'date_format' ).' '.get_option( 'time_format' );
+			#if ( get_the_modified_time( 'U' ) > get_the_time( 'U' ) ) {
+			#	echo '<small class="article-date">'.__('Last updated').': '.get_the_modified_time($time).'</small>';
+			#} else {
+			#	echo '<small class="article-date">'.__('Published').': '.get_the_time($time).'</small>';
+			#}
 			 ?>
 		</div>
 	</article>

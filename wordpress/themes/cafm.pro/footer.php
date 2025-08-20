@@ -50,29 +50,15 @@
 					<span style="clear:both;">&#160;</span>
 				</div>
 			</div>
-		</div>
-	</footer>
+		</footer>
+	</div>
 </div>
 
 </div>
 <script type="text/javascript">
 //---------------------------------------------
-// Get Windowsize
+// Adjust Canvas
 //---------------------------------------------
-var WindowSize = function() {
-	height = "";
-	width = "";
-	if(window.innerHeight != "undefined") { height = window.innerHeight; }
-	if(document.body.clientHeight != "undefined") { height = document.body.clientHeight; }
-	if(document.documentElement.clientHeight != "undefined") { height = document.documentElement.clientHeight; }
-	if(window.innerWidth != "undefined") { width = window.innerWidth; }
-	if(document.body.clientWidth != "undefined") { width = document.body.clientWidth; }
-	if(document.documentElement.clientWidth != "undefined") { width = document.documentElement.clientWidth; }
-	return { height: height, width: width };
-};
-
-
-
 function canvasAdjust( fixed ) {
 	// todo handle page max
 	let body = document.getElementsByTagName('body')[0];
@@ -119,7 +105,6 @@ function canvasAdjust( fixed ) {
 		}
 		canvas.style.minHeight = height+'px';
 	}
-
 }
 <?php
 if (get_theme_mod('js-adjust-canvas')) {

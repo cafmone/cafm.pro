@@ -6,7 +6,11 @@ if [ -z "$1" ]
 	else
 		length=$1
 	fi
-	key=$(tr -dc "A-Za-z0-9()*+,-.:;<=>?@[]^_{|}" </dev/urandom | head -c ${length}; echo)
+	str="A-Za-z0-9()*+,-.:;<=>?@[]^_{|}"
+	if ! [ -z "$2" ]; then
+		str="A-Za-z0-9"
+	fi
+	key=$(tr -dc "${str}" </dev/urandom | head -c ${length}; echo)
 	echo ${key}
 }
 
@@ -18,7 +22,7 @@ WORDPRESSURL="https://de.wordpress.org/latest-de_DE.zip"
 WORDPRESSFILE="latest-de_DE.zip"
 
 root() {
-	read -e -p "Choose Wordpress DocumentRoot: " -i "/var/www" ROOT
+	read -e -p "Choose Wordpress DocumentRoot: " -i "/var/www/html/" ROOT
 	if [ -z "${ROOT}" ]; then
 		root
 	else
@@ -33,6 +37,18 @@ start() {
 	TMPDIR=$(mktemp -d)
 	echo "Unziping to ${TMPDIR} .."
 	unzip -q ${WORDPRESSFILE} -d ${TMPDIR}
+	if ! [ -z "$1" ]; then
+		if [ -f "$1" ]; then
+			E=$(unzip -q ${1} -d ${TMPDIR}/wordpress 2>&1)
+			if ! [ -z "${E}" ]; then
+				echo "Error: Failed to unzip $1"
+				exit
+			fi
+		else
+			echo "Error: Backup file ${1} not found"
+			exit
+		fi
+	fi
 	chown -R www-data:www-data ${TMPDIR}
 	find ${TMPDIR} -type d -print0 | xargs -0 chmod 777
 	find ${TMPDIR} -type f -print0 | xargs -0 chmod 666
@@ -94,8 +110,26 @@ dbsetup() {
 	echo ""
 	echo "Configuring WordPress .."
 
-	WPPREFIX="$(mkkey 6)_"
-	WPCONFIG="${ROOT}/wp-config.php"
+	WPCONFIG="${ROOT}/wp-config.php"	
+	if [ -f ${ROOT}/wordpress.sql ]; then
+		if [ -f ${WPCONFIG} ]; then
+			echo "Running Backup .."
+			WPPREFIX=$(sed -n "s/^.*table_prefix.*'\(.*\)'.*$/\1/p" < ${WPCONFIG})
+			ERROR=$(mysql --user=$MYUSER ${WPDB} < ${ROOT}/wordpress.sql 2>&1)
+			if [ $? == 1 ]; then
+				echo "$ERROR"
+				dbsetup
+			else
+				# rmember to change db siteurl/home
+				FIX=true
+				rm ${ROOT}/wordpress.sql
+				rm ${WPCONFIG}
+			fi
+		fi
+	else
+		WPPREFIX="wp$(mkkey 6 true)_"
+	fi
+
 	cp -p ${ROOT}/wp-config-sample.php ${WPCONFIG}
 
 	sed -i -e "s/database_name_here/${WPDB}/g" ${WPCONFIG}
@@ -111,6 +145,10 @@ dbsetup() {
 	sed -i -e "s/^\(define.*'SECURE_AUTH_SALT'.*\)put your unique phrase here\(.*\)$/\1$(mkkey 64)\2/" ${WPCONFIG}
 	sed -i -e "s/^\(define.*'LOGGED_IN_SALT'.*\)put your unique phrase here\(.*\)$/\1$(mkkey 64)\2/" ${WPCONFIG}
 	sed -i -e "s/^\(define.*'NONCE_SALT'.*\)put your unique phrase here\(.*\)$/\1$(mkkey 64)\2/" ${WPCONFIG}
+	
+	if ! [ -z "${FIX}" ]; then
+		fix ${ROOT}
+	fi
 }
 
 askinstall() {
@@ -126,10 +164,10 @@ askinstall() {
 	return $retval
 }
 
-setup() {
+install() {
 	if root; then
 		if askinstall "Install Wordpress?" ; then
-			start
+			start ${1}
 			if askinstall "Install Database?" ; then
 				dbsetup
 			 else
@@ -141,10 +179,33 @@ setup() {
 	fi
 }
 
+fix() {
+	ROOT=${1}
+	read -e -p "Change WordPress siteurl to: " -i "http://127.0.0.1/" HOME
+	if [ -z "${HOME}" ]; then
+		fix ${ROOT}
+	else
+		WPCONFIG="${ROOT}/wp-config.php"
+		WPDB=$(sed -n "s/^.*DB_NAME.*'\(.*\)'.*$/\1/p" < ${WPCONFIG})
+		WPUSER=$(sed -n "s/^.*DB_USER.*'\(.*\)'.*$/\1/p" < ${WPCONFIG})
+		WPPASS=$(sed -n "s/^.*DB_PASSWORD.*'\(.*\)'.*$/\1/p" < ${WPCONFIG})
+		WPPREFIX=$(sed -n "s/^.*table_prefix.*'\(.*\)'.*$/\1/p" < ${WPCONFIG})
+		SQL="UPDATE ${WPPREFIX}options SET option_value=\"${HOME}\" WHERE option_name=\"siteurl\";"
+		SQL="${SQL} UPDATE ${WPPREFIX}options SET option_value=\"${HOME}\" WHERE option_name=\"home\";"
+		export MYSQL_PWD=${WPPASS}
+		ERROR=`mysql -u${WPUSER} ${WPDB} -e"${SQL}"`
+		if ! [ -z "${ERROR}" ]; then
+			echo ${ERROR}
+		fi
+	fi
+}
+
 backup() {
 	echo "Starting backup ..."
+	DATE=$(date +"%Y-%m-%d-%H-%M-%S")
+	FILE=${2}/wordpress-backup-${DATE}.zip
 	echo "Source: ${1}"
-	echo "Target: ${2}"
+	echo "Target: ${FILE}"
 	WPCONFIG="$1/wp-config.php"
 	if [ -f "${WPCONFIG}" ]; then
 		if [ -d "${2}" ]; then
@@ -164,16 +225,12 @@ backup() {
 			mkdir ${TMPDIR}/wp-content/
 			mkdir ${TMPDIR}/wp-content/uploads/
 			cp -rp ${1}/wp-content/uploads/. ${TMPDIR}/wp-content/uploads/
-			if [ -f "${1}/wp-content/themes/cafm.pro/custom.css" ]; then
-				mkdir ${TMPDIR}/wp-content/themes/
-				mkdir ${TMPDIR}/wp-content/themes/cafm.pro/
-				cp -rp ${1}/wp-content/themes/cafm.pro/custom.* ${TMPDIR}/wp-content/themes/cafm.pro/
-			fi
 			find ${TMPDIR} -type d -print0 | xargs -0 chmod 777
 			find ${TMPDIR} -type f -print0 | xargs -0 chmod 666
 			cd ${TMPDIR}
 			echo "Compressing files ..."
-			(cd ${TMPDIR} && zip -q -r ${2}wordpress-backup.zip *)
+			(cd ${TMPDIR} && zip -q -r ${FILE} *)
+			chmod 666 ${FILE}
 			rm -r ${TMPDIR}
 		else
 			echo "Error: target ${2} not found"
@@ -185,13 +242,15 @@ backup() {
 }
 
 usage() {
-	echo 'Usage:'
-	echo "$0 setup"
-	echo "$0 backup /path/to/wordpress /path/to/backup"
+	echo 'Usage'
+	echo "Backup: $0 backup /path/to/wordpress /path/to/backup"
+	echo "Fix siteurl: $0 fix /path/to/wordpress"
+	echo "Install: sudo $0 install"
+	echo "Install+Restore: sudo $0 install /path/to/wordpress-backup.zip"
 	exit
 }
 
-
+CURRENT=$(whoami)
 if ! [ -f ${WORDPRESSFILE} ]; then
 	wget ${WORDPRESSURL}
 fi
@@ -208,11 +267,27 @@ else
 			fi
 			backup $2 $3
 		fi
-	elif [ "$1" == "setup" ]; then
+	elif [ "$1" == "install" ]; then
+		if [ "$CURRENT" != "root" ]
+		then
+			echo "Error: Wordpress can only be installed by root user"
+			usage
+			exit
+		fi
 		if ! [ -x "$(command -v unzip)" ]; then
 			echo "Error: please run apt -y install unzip"
 			exit
 		fi
-		setup
+		if ! [ -z "$2" ]; then
+			install $2
+		else
+			install
+		fi
+	elif [ "$1" == "fix" ]; then
+		if ! [ -z "$2" ]; then
+			fix $2
+		else
+			usage
+		fi
 	fi
 fi

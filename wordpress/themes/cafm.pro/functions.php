@@ -30,9 +30,6 @@ function my_theme_setup() {
 			'image',
 		)
 	);
-	
-	
-	
 }
 add_action( 'after_setup_theme', 'my_theme_setup' );
 
@@ -44,9 +41,14 @@ function my_theme_enqueue_styles() {
 		array(),
 		wp_get_theme()->get( 'Version' )
 	);
-	
-	$uri = get_stylesheet_directory_uri();
-	$dir = get_stylesheet_directory();
+
+	// put styles to upload dir
+	$wp_upload = wp_upload_dir();
+	$uri = $wp_upload['baseurl'].'/cafm.pro';
+	$dir = $wp_upload['basedir'].'/cafm.pro';
+	if(! is_dir($dir) ) {
+		wp_mkdir_p( $dir );
+	}
 	if(! file_exists($dir . '/custom.css')) {
 		touch($dir . '/custom.css');
 	}
@@ -116,24 +118,14 @@ function disable_emojis() {
 }
 add_action( 'init', 'disable_emojis' );
 
-
-
 function nav_breadcrumb($delimiter) {
-	
-	#$delimiter = '&raquo;';
-	$home = '<span class="icon icon-home"></span>'; 
+
+	$homeLink = get_bloginfo('url');	
 	$before = '<span class="current-page">'; 
 	$after = '</span>'; 
-
-$str = '';
-
+	$str = '';
 	if ( !is_home() && !is_front_page() || is_paged() ) {
-		$str .= '<nav class="">';
-	
 		global $post;
-		$homeLink = get_bloginfo('url');
-		$str .= '<a href="' . $homeLink . '" class="icon icon-home"></a>';
-
 		if ( is_category()) {
 			global $wp_query;
 			$cat_obj = $wp_query->get_queried_object();
@@ -160,11 +152,9 @@ $str = '';
 				$post_type = get_post_type_object(get_post_type());
 				$slug = $post_type->rewrite;
 				$str .= '<a href="' . $homeLink . '/' . $slug['slug'] . '/">' . $post_type->labels->singular_name . '</a> ' . $delimiter . ' ';
-				#echo $before . get_the_title() . $after;
 			} else {
 				$cat = get_the_category(); $cat = $cat[0];
 				$str .= get_category_parents($cat, TRUE, ' ' . $delimiter . ' ');
-				#echo $before . get_the_title() . $after;
 			}
 		}
 		elseif ( !is_single() && !is_page() && get_post_type() != 'post' && !is_404() ) {
@@ -176,7 +166,6 @@ $str = '';
 			$cat = get_the_category($parent->ID); $cat = $cat[0];
 			$str .= get_category_parents($cat, TRUE, ' ' . $delimiter . ' ');
 			$str .= '<a href="' . get_permalink($parent) . '">' . $parent->post_title . '</a> ' . $delimiter . ' ';
-			#echo $before . get_the_title() . $after;
 		}
 		elseif ( is_page() && !$post->post_parent ) {
 			#echo $before . get_the_title() . $after;
@@ -193,7 +182,6 @@ $str = '';
 			foreach ($breadcrumbs as $crumb) {
 				$str .= ' ' . $delimiter . ' '.$crumb;
 			}
-			#echo $before . get_the_title() . $after;
 		}
 		elseif ( is_search() ) {
 			$str .= $before . 'Ergebnisse für Ihre Suche nach "' . get_search_query() . '"' . $after;
@@ -210,10 +198,15 @@ $str = '';
 			echo ': ' . __('Seite') . ' ' . get_query_var('paged');
 			if ( is_category() || is_day() || is_month() || is_year() || is_search() || is_tag() || is_author() ) echo ')';
 		}
-		$str .= '</nav>';
 	}
-	return $str;
-} 
+
+	$return = '';
+	if($str !== '') {
+		$return  = '<a href="'.$homeLink.'" class="icon icon-home"></a>';
+		$return .= '<nav>'.$str.'</nav>';
+	}
+	return $return;
+}
 
 
 ### TODO why
