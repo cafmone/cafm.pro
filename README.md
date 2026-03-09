@@ -5,7 +5,7 @@
 sudo bash  
 cd /root/  
 timedatectl set-timezone Europe/Berlin  
-apt -y install wget nano  
+apt -y install wget nano git  
 adduser [new user here]  
 usermod -aG sudo [new user here]  
 nano /etc/ssh/sshd_config  
