@@ -27,6 +27,12 @@ file_uploads = On
 upload_max_filesize = 20M
 ```
 /etc/init.d/apache2 restart
+nano /etc/mysql/conf.d/mysql.cnf  
+```
+[mysqld]
+max_allowed_packet=128M
+```
+/etc/init.d/mysql restart
 ## Webserver Setup  
 wget https://raw.githubusercontent.com/cafmone/cafm.pro/refs/heads/main/apache.sh  
 chmod +x apache.sh  
