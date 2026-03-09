@@ -26,7 +26,8 @@ post_max_size = 40M
 file_uploads = On
 upload_max_filesize = 20M
 ```
-/etc/init.d/apache2 restart
+/etc/init.d/apache2 restart  
+  
 nano /etc/mysql/conf.d/mysql.cnf  
 ```
 [mysqld]
